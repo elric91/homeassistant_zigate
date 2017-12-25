@@ -15,4 +15,4 @@ media_player:
     host: 192.168.1.12
 ```
 ### Component ZiGate : Zigate interface
-### /!\ Ongoing Development. No pratical use yet (except for devs) /!\
+### /!\ Ongoing Development. No practical use yet (except for devs) /!\
