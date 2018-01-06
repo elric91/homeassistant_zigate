@@ -4,7 +4,6 @@ Demo platform that has a couple of fake sensors.
 For more details about this platform, please refer to the documentation
 https://home-assistant.io/components/demo/
 """
-from homeassistant.const import TEMP_CELSIUS
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.dispatcher import (dispatcher_connect, dispatcher_send)
@@ -28,20 +27,27 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the ZiGate sensors."""
-    device = ZiGateSensor(hass, config.get(CONF_NAME), config.get(CONF_ADDRESS), config.get(CONF_DEFAULT_ATTR))
-    add_devices([device])
+    def add_new_sensor(name, address, default_addr=None, default_unit=None):
+        device = ZiGateSensor(hass, name, address, default_addr, default_unit)
+        add_devices([device])
+
+    dispatcher_connect(hass, ZGT_SIGNAL_NEW_DEVICE, add_new_sensor)
+    add_new_sensor(config.get(CONF_NAME), config.get(CONF_ADDRESS), 
+                   config.get(CONF_DEFAULT_ATTR), config.get(CONF_DEFAULT_UNIT)
+                   )
 
 
 class ZiGateSensor(Entity):
     """Representation of a Demo sensor."""
 
-    def __init__(self, hass, name, addr, default_attr=None):
+    def __init__(self, hass, name, addr, default_attr=None, default_unit=None):
         """Initialize the sensor."""
         self._name = name
         self._addr = addr
         self._default_attr = default_attr
+        self._default_unit = default_unit
         self._attributes = {}
-        dispatcher_connect(hass, ZIGATE_SIGNAL_UPDATE.format(self._addr), self.update_attributes)
+        dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addr), self.update_attributes)
 
     @property
     def should_poll(self):
