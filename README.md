@@ -25,9 +25,13 @@ To install, copy the following files in your hass configuration folder, under 'c
 - zigate/\_\_init\_\_.py
 - zigate/const.py
 - sensor/zigate.py
+- switch/zigate.py
 
 Grab interface.py from https://github.com/elric91/ZiGate/blob/master/interface.py and add it :
 - zigate/interface.py
+
+To pair a new device, go in developer/services (the little remote in the menu) and call the 'zigate.permit\_join' service.
+You have 30 seconds to pair your device. If successull, you should have a notification on your home page
 
 Example config for a xiaomi_aqara temperature sensor :
 - temperature is registered as the default value for the sensor (which grabs temperature, pressure & humidity). Any attribute declared for the sensor can be chosen as default attribute
