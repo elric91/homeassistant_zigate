@@ -8,14 +8,15 @@ import asyncio
 import logging
 import binascii
 from homeassistant.util import async as hasync
-from homeassistant.helpers.dispatcher import (async_dispatcher_connect, dispatcher_send)
+from homeassistant.helpers.dispatcher import (dispatcher_send)
+from homeassistant.components import persistent_notification
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (CONF_NAME, STATE_ON, STATE_OFF, STATE_UNKNOWN)
 import voluptuous as vol
 from functools import partial
 
-from .interface import (ZiGate, ZGT_CMD_NEW_DEVICE)
+from .interface import ZiGate
 from .const import *
 
 REQUIREMENTS = ['pyserial-asyncio==0.4']
@@ -34,7 +35,7 @@ CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
     vol.Optional(CONF_SERIAL_PORT, default=DEFAULT_SERIAL_PORT): cv.string,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-    vol.Optional(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): cv.positive_int
+    vol.Optional(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): cv.positive_int,
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -114,13 +115,7 @@ class ZiGate2HASS(ZiGate):
     def set_external_command(self, cmd, **kwargs):
         if cmd == ZGT_CMD_NEW_DEVICE:
             addr = kwargs['addr']
-            entity_id = 'new_device_{}'.format(addr)
-            current_ids = self.hass.states.async_entity_ids()
-            print('ENTITY : ', entity_id)
-            print('ENTITIES : ', current_ids)
-            # hack on name to optimize later
-            if 'sensor.{}'.format(entity_id) not in current_ids:
-                dispatcher_send(self.hass, ZGT_SIGNAL_NEW_DEVICE, entity_id, addr)
-                
+            persistent_notification.async_create(self.hass, 'New device {} paired !'.format(addr),
+                                                  title='Zigate Breaking News !')
 
 
