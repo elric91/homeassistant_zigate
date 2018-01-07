@@ -53,8 +53,14 @@ sensor:
   - platform: template
     sensors:
       pressure1:
-        friendly_name: "LivingRoom Atmospheric Pressure"
+        friendly_name: 'LivingRoom Atmospheric Pressure'
         entity_id: sensor.livingroom_sensor
         unit_of_measurement: 'mb'
-        value_template: "{{states.sensor.livingroom_sensor.attributes.pressure}}"
+        value_template: '{{ states.sensor.livingroom_sensor.attributes.pressure }}'
+
+switch:
+  - platform: zigate
+    name: 'Presence detection'
+    address: c3d4
+    default_state: 'event'
 ```
