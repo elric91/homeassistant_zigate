@@ -1,6 +1,7 @@
 """
 ZiGate platform for Zigbee switches
 """
+from time import sleep
 from homeassistant.components.switch import (SwitchDevice, PLATFORM_SCHEMA)
 from homeassistant.helpers.dispatcher import (dispatcher_connect, dispatcher_send)
 from custom_components.zigate.const import *
@@ -9,7 +10,6 @@ import homeassistant.helpers.config_validation as cv
 
 import voluptuous as vol
 
-#DOMAIN = 'zigate'
 
 CONF_DEFAULT_ATTR = 'default_state'
 
@@ -56,6 +56,11 @@ class ZiGateSwitch(SwitchDevice):
     def update_attributes(self, property_id, property_data):
         self._attributes[property_id] = property_data
         self.schedule_update_ha_state()
+        # if the signal "event_presence" has been sent, put state to normal after 15 secs
+        # No need to go async as we don't care for notifications during these 15 secs
+        if property_id == ZGT_EVENT and property_data == ZGT_EVENT_PRESENCE:
+            sleep(15)
+            self.update_attributes(property_id, None)
     
     @property
     def is_on(self):
