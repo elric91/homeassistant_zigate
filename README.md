@@ -8,8 +8,8 @@ A media_player platform that can be used through HASS to :
 - change source
 - check status
 
-To install, copy rotel.py in your hass configuration folder, under 'custom_components'
-i.e. /home/user/.homeassistant/custom_components/rotel.py
+To install, copy rotel.py in your hass configuration folder, under 'custom\_components/media\_player'
+i.e. /home/user/.homeassistant/custom\_components/media\_player/rotel.py
 
 Example minimal config (in configuration.yaml, dummy IP to be updated) :
 ```
