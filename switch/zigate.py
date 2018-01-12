@@ -52,7 +52,8 @@ class ZiGateSwitch(SwitchDevice):
         self._inverted = inverted
         self._attributes = {}
         self._state = False
-        dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addr), self.update_attributes)
+        dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addr),
+                           self.update_attributes)
 
     @property
     def should_poll(self):
@@ -83,9 +84,10 @@ class ZiGateSwitch(SwitchDevice):
                     self._state = not self._state
                 elif self._switchtype == ZGT_SWITCHTYPE_MOMENTARY:
                 # switch back state after xx secs
+                # no asyncio required as nthing expected during this time
                     self._state = True
                     self.schedule_update_ha_state()
-                    sleep(15)
+                    sleep(ZGT_AUTOTOGGLE_DELAY)
                     self._state = False
                 else:
                     self._state = True

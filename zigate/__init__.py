@@ -12,7 +12,7 @@ from homeassistant.helpers.dispatcher import (dispatcher_send)
 from homeassistant.components import persistent_notification
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (CONF_NAME, STATE_ON, STATE_OFF, STATE_UNKNOWN)
+from homeassistant.const import (CONF_NAME, CONF_HOST, CONF_PORT)
 import voluptuous as vol
 from functools import partial
 
@@ -25,17 +25,21 @@ DOMAIN = 'zigate'
 
 _LOGGER = logging.getLogger(__name__)
 
+CONF_BAUDRATE = 'baudrate'
+CONF_SERIAL_PORT = 'serial_port'
 DEFAULT_NAME = 'ZiGate'
 DEFAULT_SERIAL_PORT = '/dev/ttyUSB0'
 DEFAULT_BAUDRATE = 115200
-CONF_BAUDRATE = 'baudrate'
-CONF_SERIAL_PORT = 'serial_port'
+DEFAULT_HOST = None
+DEFAULT_PORT = 9999
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
     vol.Optional(CONF_SERIAL_PORT, default=DEFAULT_SERIAL_PORT): cv.string,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): cv.positive_int,
+    vol.Optional(CONF_HOST, default=DEFAULT_HOST): cv.string,
+    vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.positive_int,
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -48,6 +52,8 @@ def async_setup(hass, config):
 
     # device interpreter
     zigate = ZiGate2HASS(hass)
+
+    # Commands available as HASS services
     def permit_join(call):
         """Put ZiGate in Permit Join mode and register new devices"""
         zigate.permit_join()
@@ -62,11 +68,23 @@ def async_setup(hass, config):
     hass.services.async_register(DOMAIN, 'raw_command', raw_command)
 
     # Asyncio serial connection to the device
-    coro = serial_asyncio.create_serial_connection(hass.loop, SerialProtocol, \
-                                                   config[DOMAIN].get(CONF_SERIAL_PORT), \
-                                                   baudrate=config[DOMAIN].get(CONF_BAUDRATE))
+    # If HOST is configured, then connection is WiFi
+    if config[DOMAIN].get(CONF_HOST) is None:
+        # Serial
+        coro = serial_asyncio.create_serial_connection(hass.loop, ZiGateProtocol, 
+                                      config[DOMAIN].get(CONF_SERIAL_PORT),
+                                      baudrate=config[DOMAIN].get(CONF_BAUDRATE))
+    else:
+        # WiFi
+        coro = hass.loop.create_connection(ZiGateProtocol, 
+                                           host=config[DOMAIN].get(CONF_HOST),
+                                           port=config[DOMAIN].get(CONF_PORT))
+        #coro = hass.loop.create_connection(ZiGateProtocol, 
+        #                                   host='10.91.3.9',
+        #                                   port=9999)
+
     future = hasync.run_coroutine_threadsafe(coro, hass.loop)
-    # bind serial connection to the device interpreter
+    # bind connection to the device interpreter
     future.add_done_callback(partial(bind_transport_to_device, zigate))
     
     
@@ -84,19 +102,18 @@ def bind_transport_to_device(device, protocol_refs):
     device.send_to_transport = transport.write
 
 
-class SerialProtocol(asyncio.Protocol):
+class ZiGateProtocol(asyncio.Protocol):
 
     def connection_made(self, transport):
         _LOGGER.debug('ZIGATE : Transport initialized : %s' % transport)
         self.transport = transport
-        transport.serial.rts = False
-        #transport.write(b'hello world\n')
 
     def data_received(self, data):
         try:
             self.device.read_data(data)
         except:
-            _LOGGER.debug('ZIGATE : Data received but not ready {!r}'.format(data.decode()))
+            _LOGGER.debug('ZIGATE : Data received but not ready {!r}'.
+                          format(data.decode()))
 
     def connection_lost(self, exc):
         _LOGGER.debug('ZIGATE : Connection Lost !')
@@ -106,16 +123,21 @@ class ZiGate2HASS(ZiGate):
     def __init__(self, hass):
         super().__init__()
         self.hass = hass
-        self.config_request_id = None
 
     def set_device_property(self, addr, property_id, property_data):
         # decoding the address to assign the proper signal (bytes --> str)
-        dispatcher_send(self.hass, ZGT_SIGNAL_UPDATE.format(addr.decode()), property_id, property_data)
+        addr = ZGT_SIGNAL_UPDATE.format(addr.decode())
+        _LOGGER.debug('ZIGATE SIGNAL :')
+        _LOGGER.debug('- Signal   : {}'.format(addr))
+        _LOGGER.debug('- Property : {}'.format(property_id))
+        _LOGGER.debug('- Data     : {}'.format(property_data))
+        dispatcher_send(self.hass, addr, property_id, property_data)
 
     def set_external_command(self, cmd, **kwargs):
         if cmd == ZGT_CMD_NEW_DEVICE:
             addr = kwargs['addr']
-            persistent_notification.async_create(self.hass, 'New device {} paired !'.format(addr),
-                                                  title='Zigate Breaking News !')
+            persistent_notification.async_create(self.hass, 'New device {} paired !'.
+                                                 format(addr), 
+                                                 title='Zigate Breaking News !')
 
 
