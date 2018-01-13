@@ -18,7 +18,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_ADDRESS): cv.string,
     vol.Optional(CONF_DEFAULT_ATTR, default=None): cv.string,
-    vol.Optional(CONF_TYPE, default=None): cv.string,
+    vol.Optional(CONF_TYPE, default=None): vol.Any(ZGT_SWITCHTYPE_TOGGLE,
+                                                   ZGT_SWITCHTYPE_MOMENTARY),
     vol.Optional(CONF_INVERTED, default=None): cv.string,
 })
 
@@ -43,16 +44,16 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 class ZiGateSwitch(SwitchDevice):
     """Representation of a Zigbee switch as seen by the ZiGate."""
 
-    def __init__(self, hass, name, addr, default_attr, switchtype, inverted):
+    def __init__(self, hass, name, addrep, default_attr, switchtype, inverted):
         """Initialize the switch."""
         self._name = name
-        self._addr = addr
+        self._addrep = addrep
         self._default_attr = default_attr
         self._switchtype = switchtype
         self._inverted = inverted
         self._attributes = {}
         self._state = False
-        dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addr),
+        dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addrep),
                            self.update_attributes)
 
     @property
