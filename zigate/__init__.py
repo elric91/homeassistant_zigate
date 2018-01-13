@@ -79,9 +79,6 @@ def async_setup(hass, config):
         coro = hass.loop.create_connection(ZiGateProtocol, 
                                            host=config[DOMAIN].get(CONF_HOST),
                                            port=config[DOMAIN].get(CONF_PORT))
-        #coro = hass.loop.create_connection(ZiGateProtocol, 
-        #                                   host='10.91.3.9',
-        #                                   port=9999)
 
     future = hasync.run_coroutine_threadsafe(coro, hass.loop)
     # bind connection to the device interpreter
