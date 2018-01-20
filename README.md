@@ -11,8 +11,15 @@ To install, copy the following files in your hass configuration folder, under 'c
 - sensor/zigate.py
 - switch/zigate.py
 
-Grab interface.py from https://github.com/elric91/ZiGate/blob/master/interface.py and add it :
-- zigate/interface.py
+Install pyzigate pip package which is a requirement :
+```
+pip3 install pyzigate
+```
+if you get a 'bd_wheel' error, do this before installing pyzigate :
+```
+pip3 install wheel
+```
+
 
 To pair a new device, go in developer/services (the little remote in the menu) and call the 'zigate.permit\_join' service.
 You have 30 seconds to pair your device. If successull, you should have a notification on your home page
