@@ -16,10 +16,10 @@ from homeassistant.const import (CONF_NAME, CONF_HOST, CONF_PORT)
 import voluptuous as vol
 from functools import partial
 
-from .interface import ZiGate
+from pyzigate.interface import ZiGate
 from .const import *
 
-REQUIREMENTS = ['pyserial-asyncio==0.4']
+REQUIREMENTS = ['pyserial-asyncio==0.4', 'pyzigate==0.1.0']
 
 DOMAIN = 'zigate'
 
@@ -117,6 +117,7 @@ class ZiGateProtocol(asyncio.Protocol):
 
 
 class ZiGate2HASS(ZiGate):
+
     def __init__(self, hass):
         super().__init__()
         self.hass = hass
