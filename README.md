@@ -1,7 +1,4 @@
-# Custom components for Home Assistant
-Custom components for Home Assistant
-
-### /!\ still beta stage ... for developpers /!\
+# ZiGate components for Home Assistant
 A new component which enable to grab Zigbee data through the ZiGate (http://zigate.fr)
 
 To install, simply copy all the files in your hass configuration folder, under 'custom\_components' and adapt your configuration.yaml
