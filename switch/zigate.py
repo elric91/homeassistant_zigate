@@ -4,12 +4,13 @@ ZiGate platform for Zigbee switches
 from time import sleep
 from homeassistant.components.switch import (SwitchDevice, PLATFORM_SCHEMA)
 from homeassistant.helpers.dispatcher import (dispatcher_connect, dispatcher_send)
-from custom_components.zigate.const import *
 from homeassistant.const import (CONF_NAME, CONF_ADDRESS, STATE_UNKNOWN, CONF_TYPE)
 import homeassistant.helpers.config_validation as cv
 
 import voluptuous as vol
 
+from custom_components.zigate.const import *
+from pyzigate.zgt_parameters import *
 
 CONF_DEFAULT_ATTR = 'default_state'
 CONF_INVERTED = 'inverted'

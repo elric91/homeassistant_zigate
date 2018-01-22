@@ -1,25 +1,17 @@
 """
 Support for ZiGate
-currently only supports serial connection
-(support for the wifi module will be added once serial is working properly)
 """
 
 import asyncio
 import logging
-import binascii
 from homeassistant.util import async as hasync
-from homeassistant.helpers.dispatcher import (dispatcher_send)
-from homeassistant.components import persistent_notification
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (CONF_NAME, CONF_HOST, CONF_PORT)
 import voluptuous as vol
 from functools import partial
 
-from pyzigate.interface import ZiGate
-from .const import *
-
-REQUIREMENTS = ['pyserial-asyncio==0.4', 'pyzigate==0.1.0']
+REQUIREMENTS = ['pyserial-asyncio==0.4', 'pyzigate==0.1.1']
 
 DOMAIN = 'zigate'
 
@@ -48,6 +40,9 @@ CONFIG_SCHEMA = vol.Schema({
 def async_setup(hass, config):
     """ Setup the ZiGate platform """
     import serial_asyncio
+    from .zigate2hass import ZiGateProtocol, ZiGate2HASS
+    from pyzigate.interface import ZiGate
+
     _LOGGER.debug('ZIGATE : Starting')
 
     # device interpreter
@@ -83,8 +78,6 @@ def async_setup(hass, config):
     future = hasync.run_coroutine_threadsafe(coro, hass.loop)
     # bind connection to the device interpreter
     future.add_done_callback(partial(bind_transport_to_device, zigate))
-    
-    
     return True
 
 def bind_transport_to_device(device, protocol_refs):
@@ -97,57 +90,5 @@ def bind_transport_to_device(device, protocol_refs):
     
     protocol.device = device
     device.send_to_transport = transport.write
-
-
-class ZiGateProtocol(asyncio.Protocol):
-
-    def connection_made(self, transport):
-        _LOGGER.debug('ZIGATE : Transport initialized : %s' % transport)
-        self.transport = transport
-
-    def data_received(self, data):
-        try:
-            self.device.read_data(data)
-        except:
-            _LOGGER.debug('ZIGATE : Data received but not ready {!r}'.
-                          format(data.decode()))
-
-    def connection_lost(self, exc):
-        _LOGGER.debug('ZIGATE : Connection Lost !')
-
-
-class ZiGate2HASS(ZiGate):
-
-    def __init__(self, hass):
-        super().__init__()
-        self.hass = hass
-
-    def set_device_property(self, addr, endpoint, property_id, property_data):
-        # decoding the address to assign the proper signal (bytes --> str)
-        if endpoint:
-            addrep = ZGT_SIGNAL_UPDATE.format(addr.decode() + endpoint.decode())
-        else:
-            addrep = ZGT_SIGNAL_UPDATE.format(addr.decode())
-
-        _LOGGER.debug('ZIGATE SIGNAL :')
-        _LOGGER.debug('- Signal   : {}'.format(addrep))
-        _LOGGER.debug('- Property : {}'.format(property_id))
-        _LOGGER.debug('- Data     : {}'.format(property_data))
-        dispatcher_send(self.hass, addrep, property_id, property_data)
-
-    def set_external_command(self, cmd, **msg):
-        if cmd == ZGT_CMD_NEW_DEVICE:
-            addr = msg['addr']
-            persistent_notification.async_create(self.hass, 'New device {} paired !'.
-                                                 format(addr), 
-                                                 title='Zigate Breaking News !')
-            # requesting endpoint list
-            #print('endpoint list for {}'.format(addr))
-            #self.hass.services.async_call(DOMAIN, 'raw_command',
-            #                     {'cmd':'0045', 'data':addr})
-        elif cmd == ZGT_CMD_LIST_ENDPOINTS:
-            ep_list = '\n'.join(msg['endpoints'])
-            title = 'Endpoint list for device {} :'.format(msg['addr'])
-            persistent_notification.async_create(self.hass, ep_list, title=title)
 
 

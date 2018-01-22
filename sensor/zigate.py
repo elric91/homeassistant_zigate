@@ -4,11 +4,13 @@ ZiGate platform for Zigbee sensors.
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.dispatcher import (dispatcher_connect, dispatcher_send)
-from custom_components.zigate.const import *
 from homeassistant.const import (CONF_NAME, CONF_ADDRESS, STATE_UNKNOWN)
 import homeassistant.helpers.config_validation as cv
 
 import voluptuous as vol
+
+from custom_components.zigate.const import *
+from pyzigate.zgt_parameters import *
 
 CONF_DEFAULT_ATTR = 'default_state'
 CONF_DEFAULT_UNIT = 'default_unit'
