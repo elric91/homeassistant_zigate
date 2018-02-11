@@ -34,6 +34,7 @@ inverted :
 will switch back to previous state some seconds later
 """
 
+
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the ZiGate sensors."""
     device = ZiGateSwitch(hass, config.get(CONF_NAME), config.get(CONF_ADDRESS), 
@@ -42,11 +43,12 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                          )
     add_devices([device])
 
+
 class ZiGateSwitch(SwitchDevice):
     """Representation of a Zigbee switch as seen by the ZiGate."""
-
     def __init__(self, hass, name, addrep, default_attr, switchtype, inverted):
         """Initialize the switch."""
+        self._hass = hass
         self._name = name
         self._addrep = addrep
         self._default_attr = default_attr
@@ -85,8 +87,8 @@ class ZiGateSwitch(SwitchDevice):
                 if self._switchtype == ZGT_SWITCHTYPE_TOGGLE:
                     self._state = not self._state
                 elif self._switchtype == ZGT_SWITCHTYPE_MOMENTARY:
-                # switch back state after xx secs
-                # no asyncio required as nthing expected during this time
+                    # switch back state after xx secs
+                    # no asyncio required as nthing expected during this time
                     self._state = True
                     self.schedule_update_ha_state()
                     sleep(ZGT_AUTOTOGGLE_DELAY)
@@ -111,6 +113,14 @@ class ZiGateSwitch(SwitchDevice):
     def turn_on(self, **kwargs):
         """Turn the switch on."""
         self._state = True
+        # Send the ON command
+        self._hass.services.call('zigate', 'raw_command', {
+            'cmd': '0092',
+            'data': "02{addr}01{ep}01".format(
+                addr=self._addrep[:4],
+                ep=self._addrep[-2:]
+            )
+        })
         self.schedule_update_ha_state()
 
     def turn_off(self, **kwargs):
@@ -119,5 +129,12 @@ class ZiGateSwitch(SwitchDevice):
         if self._default_attr == ZGT_EVENT:
             self._attributes[ZGT_EVENT] = None
         self._state = False
+        # Send the OFF command
+        self._hass.services.call('zigate', 'raw_command', {
+            'cmd': '0092',
+            'data': "02{addr}01{ep}00".format(
+                addr=self._addrep[:4],
+                ep=self._addrep[-2:]
+            )
+        })
         self.schedule_update_ha_state()
-
