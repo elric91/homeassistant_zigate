@@ -14,6 +14,7 @@ from functools import partial
 REQUIREMENTS = ['pyserial-asyncio==0.4', 'pyzigate==0.1.2']
 
 DOMAIN = 'zigate'
+COMPONENT_TYPES = ('light', 'switch', 'sensor')
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,6 +48,16 @@ def async_setup(hass, config):
 
     # device interpreter
     zigate = ZiGate2HASS(hass)
+
+    # Go through config and find all addresses of zigate devices
+    _LOGGER.debug('ZIGATE : Finding zigate addresses')
+    for domain_config in config.keys():
+        if domain_config in COMPONENT_TYPES:
+            for platform_config in config[domain_config]:
+                if platform_config['platform'] == DOMAIN:
+                    if 'address' in platform_config.keys():
+                        zigate.add_known_device(str(platform_config['address'])[:4])
+    _LOGGER.debug('ZIGATE : All known addresses added')
 
     # Commands available as HASS services
     def permit_join(call):

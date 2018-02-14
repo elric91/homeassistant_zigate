@@ -34,6 +34,7 @@ class ZiGate2HASS(ZiGate):
     def __init__(self, hass):
         super().__init__()
         self._hass = hass
+        self._known_devices = set()
 
     def set_device_property(self, addr, endpoint, property_id, property_data):
         # decoding the address to assign the proper signal (bytes --> str)
@@ -51,12 +52,15 @@ class ZiGate2HASS(ZiGate):
     def set_external_command(self, cmd, **msg):
         if cmd == ZGT_CMD_NEW_DEVICE:
             addr = msg['addr']
-            persistent_notification.async_create(self._hass, 'New device {} paired !'.
-                                                 format(addr), 
-                                                 title='Zigate Breaking News !')
+            if addr not in self._known_devices:
+                persistent_notification.async_create(self._hass, 'New device {} paired !'.
+                                                     format(addr),
+                                                     title='Zigate Breaking News !')
         elif cmd == ZGT_CMD_LIST_ENDPOINTS:
             ep_list = '\n'.join(msg['endpoints'])
             title = 'Endpoint list for device {} :'.format(msg['addr'])
             persistent_notification.async_create(self._hass, ep_list, title=title)
 
+    def add_known_device(self, device_address):
+        self._known_devices.add(device_address[:4])
 
