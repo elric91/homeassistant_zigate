@@ -24,6 +24,7 @@ DEFAULT_SERIAL_PORT = '/dev/ttyUSB0'
 DEFAULT_BAUDRATE = 115200
 DEFAULT_HOST = None
 DEFAULT_PORT = 9999
+DEFAULT_CHANNEL = '11'
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
@@ -59,8 +60,15 @@ def async_setup(hass, config):
         data = call.data.get('data', '')
         zigate.send_data(cmd, data)
 
+    def zigate_init(call):
+        channel = call.data.get('channel', DEFAULT_CHANNEL)
+        zigate.send_data('0021','0000%02x00' % int(channel)) # Channel
+        zigate.send_data('0023','00') # Coordinator
+        zigate.send_data('0024','') # Start network
+
     hass.services.async_register(DOMAIN, 'permit_join', permit_join)
     hass.services.async_register(DOMAIN, 'raw_command', raw_command)
+    hass.services.async_register(DOMAIN, 'init', zigate_init)
 
     # Asyncio serial connection to the device
     # If HOST is configured, then connection is WiFi
