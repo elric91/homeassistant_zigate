@@ -14,6 +14,7 @@ from pyzigate.zgt_parameters import *
 
 CONF_DEFAULT_ATTR = 'default_state'
 CONF_INVERTED = 'inverted'
+CONF_AUTOTOGGLE_DELAY = 'autotoggle_delay'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
@@ -23,6 +24,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
                                                    ZGT_SWITCHTYPE_TOGGLE,
                                                    ZGT_SWITCHTYPE_MOMENTARY),
     vol.Optional(CONF_INVERTED, default=False): cv.boolean,
+    vol.Optional(CONF_AUTOTOGGLE_DELAY, default=ZGT_AUTOTOGGLE_DELAY): cv.positive_int,
 })
 
 """
@@ -40,14 +42,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the ZiGate sensors."""
     device = ZiGateSwitch(hass, config.get(CONF_NAME), config.get(CONF_ADDRESS), 
                          config.get(CONF_DEFAULT_ATTR), config.get(CONF_TYPE),
-                         config.get(CONF_INVERTED),
+                         config.get(CONF_INVERTED), config.get(CONF_AUTOTOGGLE_DELAY)
                          )
     add_devices([device])
 
 
 class ZiGateSwitch(SwitchDevice):
     """Representation of a Zigbee switch as seen by the ZiGate."""
-    def __init__(self, hass, name, addrep, default_attr, switchtype, inverted):
+    def __init__(self, hass, name, addrep, default_attr, switchtype, inverted, autotoggle_delay):
         """Initialize the switch."""
         self._hass = hass
         self._name = name
@@ -57,6 +59,7 @@ class ZiGateSwitch(SwitchDevice):
         self._inverted = inverted
         self._attributes = {}
         self._state = False
+        self._autotoggle_delay = autotoggle_delay
         dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addrep),
                            self.update_attributes)
 
@@ -92,7 +95,7 @@ class ZiGateSwitch(SwitchDevice):
                     # no asyncio required as nthing expected during this time
                     self._state = True
                     self.schedule_update_ha_state()
-                    sleep(ZGT_AUTOTOGGLE_DELAY)
+                    sleep(self._autotoggle_delay)
                     self._state = False
                 else:
                     self._state = True
