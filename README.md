@@ -13,7 +13,7 @@ Example config for a xiaomi\_aqara temperature sensor :
 - pressure is made available in the interface / history / graphs through a template
 - address is the short address of the Zigbee component (previously registered)
 
-__More example in the wiki__
+__More examples in the wiki__
 
 ```
 # Enable ZiGate
