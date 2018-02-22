@@ -36,5 +36,11 @@ switch:
   - platform: zigate
     name: 'Presence detection'
     address: c3d401
+    
+light:
+  - platform: zigate
+    name: 'Light'
+    address: 6e8e01
+    light_type: 'dual-white'
     default_state: 'event'
 ```
