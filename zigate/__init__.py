@@ -23,7 +23,7 @@ CONF_SERIAL_PORT = 'serial_port'
 DEFAULT_NAME = 'ZiGate'
 DEFAULT_SERIAL_PORT = '/dev/ttyUSB0'
 DEFAULT_BAUDRATE = 115200
-DEFAULT_HOST = None
+DEFAULT_HOST = ''
 DEFAULT_PORT = 9999
 DEFAULT_CHANNEL = '11'
 
@@ -83,7 +83,7 @@ def async_setup(hass, config):
 
     # Asyncio serial connection to the device
     # If HOST is configured, then connection is WiFi
-    if config[DOMAIN].get(CONF_HOST) is None:
+    if config[DOMAIN].get(CONF_HOST) is "":
         # Serial
         coro = serial_asyncio.create_serial_connection(hass.loop, ZiGateProtocol, 
                                       config[DOMAIN].get(CONF_SERIAL_PORT),

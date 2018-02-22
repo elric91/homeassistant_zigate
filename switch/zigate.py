@@ -18,10 +18,11 @@ CONF_INVERTED = 'inverted'
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_ADDRESS): cv.string,
-    vol.Optional(CONF_DEFAULT_ATTR, default=None): cv.string,
-    vol.Optional(CONF_TYPE, default=None): vol.Any(ZGT_SWITCHTYPE_TOGGLE,
+    vol.Optional(CONF_DEFAULT_ATTR, default='None'): cv.string,
+    vol.Optional(CONF_TYPE, default=None): vol.Any(None,
+                                                   ZGT_SWITCHTYPE_TOGGLE,
                                                    ZGT_SWITCHTYPE_MOMENTARY),
-    vol.Optional(CONF_INVERTED, default=None): cv.string,
+    vol.Optional(CONF_INVERTED, default=False): cv.boolean,
 })
 
 """
@@ -51,7 +52,7 @@ class ZiGateSwitch(SwitchDevice):
         self._hass = hass
         self._name = name
         self._addrep = addrep
-        self._default_attr = default_attr
+        self._default_attr = default_attr if default_attr != 'None' else None
         self._switchtype = switchtype
         self._inverted = inverted
         self._attributes = {}
@@ -76,7 +77,7 @@ class ZiGateSwitch(SwitchDevice):
     def update_attributes(self, property_id, property_data):
         self._attributes[property_id] = property_data
 
-        if self._inverted:
+        if self._inverted is True:
             on_states = [ZGT_STATE_OFF]
         else:
             on_states = [ZGT_EVENT_PRESENCE, ZGT_STATE_ON] 

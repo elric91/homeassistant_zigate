@@ -18,8 +18,8 @@ CONF_DEFAULT_UNIT = 'default_unit'
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_ADDRESS): cv.string,
-    vol.Optional(CONF_DEFAULT_ATTR, default=None): cv.string,
-    vol.Optional(CONF_DEFAULT_UNIT, default=None): cv.string,
+    vol.Optional(CONF_DEFAULT_ATTR, default=''): cv.string,
+    vol.Optional(CONF_DEFAULT_UNIT, default=''): cv.string,
 })
 
 
@@ -39,8 +39,8 @@ class ZiGateSensor(Entity):
         """Initialize the sensor."""
         self._name = name
         self._addr = addr
-        self._default_attr = default_attr
-        self._default_unit = default_unit
+        self._default_attr = default_attr if default_attr != '' else None
+        self._default_unit = default_unit if default_unit != '' else None
         self._attributes = {}
         dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addr), self.update_attributes)
 

@@ -24,7 +24,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_ADDRESS): cv.string,
     vol.Required(CONF_LIGHT_TYPE, default='white'): cv.string,
-    vol.Optional(CONF_LIGHT_MANUFACTURER, default=None): cv.string,
+    vol.Optional(CONF_LIGHT_MANUFACTURER, default=''): cv.string,
     vol.Optional(CONF_FADE_SPEED, default=0): cv.positive_int,
 })
 
