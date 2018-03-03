@@ -11,7 +11,7 @@ from homeassistant.const import (CONF_NAME, CONF_HOST, CONF_PORT)
 import voluptuous as vol
 from functools import partial
 
-REQUIREMENTS = ['pyserial-asyncio==0.4', 'pyzigate==0.1.2']
+REQUIREMENTS = ['pyserial-asyncio==0.4', 'pyzigate==0.1.3']
 
 DOMAIN = 'zigate'
 COMPONENT_TYPES = ('light', 'switch', 'sensor')
