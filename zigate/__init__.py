@@ -4,7 +4,14 @@ Support for ZiGate
 
 import asyncio
 import logging
-from homeassistant.util import async as hasync
+try:
+    # Valid since HomeAssistant 0.66+
+    from homeassistant.util import async_ as hasync
+except ImportError:
+    # backwards compatibility, with workaround to avoid reserved word "async"
+    # from homeassistant.util import async as hasync  # <- invalid syntax in Python 3.7
+    import importlib
+    hasync = importlib.import_module("homeassistant.util.async")
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (CONF_NAME, CONF_HOST, CONF_PORT)
