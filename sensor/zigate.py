@@ -82,5 +82,7 @@ class ZiGateSensor(Entity):
         """Handle entity which will be added."""
         state = yield from async_get_last_state(self.hass, self.entity_id)
         if state:
-            self._attributes.update(state.attributes)
-            _LOGGER.info('{}: got attributes from last state: {}'.format(self._name, self._attributes))
+            for attr in iter(state.attributes):
+                if (attr != 'friendly_name' and attr != 'last seen'):
+                    _LOGGER.info('{}: set attribute {} from last state: {}'.format(self._name, attr, state.attributes[attr]))
+                    self.update_attributes(attr, state.attributes[attr])
