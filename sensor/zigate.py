@@ -35,11 +35,11 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 class ZiGateSensor(Entity):
     """Representation of a Zigbee sensor as seen by the Zigate."""
 
-    def __init__(self, hass, name, addr, default_attr=None, default_unit=None):
+    def __init__(self, hass, name, addr, default_attr=ZGT_LAST_SEEN, default_unit=None):
         """Initialize the sensor."""
         self._name = name
         self._addr = addr
-        self._default_attr = default_attr if default_attr != '' else None
+        self._default_attr = default_attr if default_attr != '' else ZGT_LAST_SEEN
         self._default_unit = default_unit if default_unit != '' else None
         self._attributes = {}
         dispatcher_connect(hass, ZGT_SIGNAL_UPDATE.format(self._addr), self.update_attributes)
