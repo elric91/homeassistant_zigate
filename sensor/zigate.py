@@ -4,13 +4,18 @@ ZiGate platform for Zigbee sensors.
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.dispatcher import (dispatcher_connect, dispatcher_send)
-from homeassistant.const import (CONF_NAME, CONF_ADDRESS, STATE_UNKNOWN)
+from homeassistant.helpers.restore_state import async_get_last_state
+from homeassistant.const import (CONF_NAME, CONF_ADDRESS, STATE_UNKNOWN, ATTR_FRIENDLY_NAME)
 import homeassistant.helpers.config_validation as cv
 
+import asyncio
+import logging
 import voluptuous as vol
 
 from custom_components.zigate.const import *
 from pyzigate.zgt_parameters import *
+
+_LOGGER = logging.getLogger(__name__)
 
 CONF_DEFAULT_ATTR = 'default_state'
 CONF_DEFAULT_UNIT = 'default_unit'
@@ -72,3 +77,12 @@ class ZiGateSensor(Entity):
         self.schedule_update_ha_state()
 
 
+    @asyncio.coroutine
+    def async_added_to_hass(self):
+        """Handle entity which will be added."""
+        state = yield from async_get_last_state(self.hass, self.entity_id)
+        if state:
+            for attr in iter(state.attributes):
+                if attr != ATTR_FRIENDLY_NAME:
+                    _LOGGER.info('{}: set attribute {} from last state: {}'.format(self._name, attr, state.attributes[attr]))
+                    self.update_attributes(attr, state.attributes[attr])
