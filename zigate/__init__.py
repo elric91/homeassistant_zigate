@@ -64,7 +64,7 @@ def async_setup(hass, config):
             for platform_config in config[domain_config]:
                 if platform_config['platform'] == DOMAIN:
                     if 'address' in platform_config.keys():
-                        zigate.add_known_device(str(platform_config['address'])[:4])
+                        zigate.add_known_device(str(platform_config['address'])[:6])
     _LOGGER.debug('ZIGATE : All known addresses added')
 
     # Commands available as HASS services
