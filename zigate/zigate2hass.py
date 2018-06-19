@@ -62,5 +62,5 @@ class ZiGate2HASS(ZiGate):
             persistent_notification.async_create(self._hass, ep_list, title=title)
 
     def add_known_device(self, device_address):
-        self._known_devices.add(device_address[:4])
+        self._known_devices.add(device_address[:6])
 
