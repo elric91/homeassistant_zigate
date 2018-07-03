@@ -35,6 +35,7 @@ class ZiGate2HASS(ZiGate):
         super().__init__()
         self._hass = hass
         self._known_devices = set()
+        self._known_devices_full = set()
 
     def set_device_property(self, addr, endpoint, property_id, property_data):
         # decoding the address to assign the proper signal (bytes --> str)
@@ -62,5 +63,6 @@ class ZiGate2HASS(ZiGate):
             persistent_notification.async_create(self._hass, ep_list, title=title)
 
     def add_known_device(self, device_address):
-        self._known_devices.add(device_address[:6])
+        self._known_devices_full.add(device_address[:6])
+        self._known_devices.add(device_address[:4])
 
