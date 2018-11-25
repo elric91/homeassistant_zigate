@@ -12,8 +12,9 @@ import asyncio
 import logging
 import voluptuous as vol
 
+DEPENDENCIES = ['zigate']
+
 from custom_components.zigate.const import *
-from pyzigate.zgt_parameters import *
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,10 +39,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
 
 class ZiGateSensor(Entity):
+    from pyzigate.zgt_parameters import ZGT_LAST_SEEN
     """Representation of a Zigbee sensor as seen by the Zigate."""
 
     def __init__(self, hass, name, addr, default_attr=ZGT_LAST_SEEN, default_unit=None):
         """Initialize the sensor."""
+        from pyzigate.zgt_parameters import ZGT_LAST_SEEN
+
         self._name = name
         self._addr = addr
         self._default_attr = default_attr if default_attr != '' else ZGT_LAST_SEEN

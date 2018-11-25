@@ -9,8 +9,9 @@ import homeassistant.helpers.config_validation as cv
 
 import voluptuous as vol
 
+DEPENDENCIES = ['zigate']
+
 from custom_components.zigate.const import *
-from pyzigate.zgt_parameters import *
 
 CONF_DEFAULT_ATTR = 'default_state'
 CONF_INVERTED = 'inverted'
@@ -78,6 +79,8 @@ class ZiGateSwitch(SwitchDevice):
         return self._attributes
 
     def update_attributes(self, property_id, property_data):
+        from pyzigate.zgt_parameters import ZGT_STATE_OFF, ZGT_EVENT_PRESENCE, ZGT_STATE_ON
+
         self._attributes[property_id] = property_data
 
         if self._inverted is True:
@@ -128,6 +131,7 @@ class ZiGateSwitch(SwitchDevice):
         self.schedule_update_ha_state()
 
     def turn_off(self, **kwargs):
+        from pyzigate.zgt_parameters import ZGT_EVENT
         """Turn the device off."""
         # Disarm the activated event
         if self._default_attr == ZGT_EVENT:

@@ -13,8 +13,9 @@ import homeassistant.helpers.config_validation as cv
 
 import voluptuous as vol
 
+DEPENDENCIES = ['zigate']
+
 from custom_components.zigate.const import *
-from pyzigate.zgt_parameters import *
 
 CONF_LIGHT_TYPE = 'light_type'
 CONF_FADE_SPEED = 'fade_speed'
