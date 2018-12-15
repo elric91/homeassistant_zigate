@@ -84,7 +84,7 @@ class ZiGateSensor(RestoreEntity):
     @asyncio.coroutine
     def async_added_to_hass(self):
         """Handle entity which will be added."""
-        state = yield from async_get_last_state()
+        state = yield from self.async_get_last_state()
         if state:
             for attr in iter(state.attributes):
                 if attr != ATTR_FRIENDLY_NAME:
