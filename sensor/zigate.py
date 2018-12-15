@@ -4,7 +4,7 @@ ZiGate platform for Zigbee sensors.
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.dispatcher import (dispatcher_connect, dispatcher_send)
-from homeassistant.helpers.restore_state import async_get_last_state
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.const import (CONF_NAME, CONF_ADDRESS, STATE_UNKNOWN, ATTR_FRIENDLY_NAME)
 import homeassistant.helpers.config_validation as cv
 
@@ -38,7 +38,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices([device])
 
 
-class ZiGateSensor(Entity):
+class ZiGateSensor(RestoreEntity):
     from pyzigate.zgt_parameters import ZGT_LAST_SEEN
     """Representation of a Zigbee sensor as seen by the Zigate."""
 
@@ -84,7 +84,7 @@ class ZiGateSensor(Entity):
     @asyncio.coroutine
     def async_added_to_hass(self):
         """Handle entity which will be added."""
-        state = yield from async_get_last_state(self.hass, self.entity_id)
+        state = yield from async_get_last_state()
         if state:
             for attr in iter(state.attributes):
                 if attr != ATTR_FRIENDLY_NAME:
