@@ -30,12 +30,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the ZiGate sensors."""
     device = ZiGateSensor(hass, config.get(CONF_NAME), config.get(CONF_ADDRESS), 
                          config.get(CONF_DEFAULT_ATTR), config.get(CONF_DEFAULT_UNIT)
                          )
-    add_devices([device])
+    add_entities([device])
 
 
 class ZiGateSensor(RestoreEntity):
@@ -81,10 +81,11 @@ class ZiGateSensor(RestoreEntity):
         self.schedule_update_ha_state()
 
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Handle entity which will be added."""
-        state = yield from self.async_get_last_state()
+
+        await super().async_added_to_hass()
+        state = await self.async_get_last_state()
         if state:
             for attr in iter(state.attributes):
                 if attr != ATTR_FRIENDLY_NAME:
